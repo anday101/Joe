@@ -1,192 +1,236 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Whacky Hijinks Joe FPS</title>
 <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background: #111;
-    font-family: Arial, sans-serif;
-    touch-action: none;
-    user-select: none;
-  }
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #111;
+  font-family: Arial, sans-serif;
+  touch-action: none;
+  user-select: none;
+}
 
-  canvas {
-    display: block;
-    width: 100vw;
-    height: 100vh;
-    background: #111;
-    touch-action: none;
-  }
+canvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+}
 
-  #start {
-    position: fixed;
-    inset: 0;
-    background: linear-gradient(#151515, #332200);
-    color: white;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 24px;
-  }
+#startScreen, #gameOver {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: linear-gradient(135deg, #10243d, #17110a);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+}
 
-  #startBox {
-    max-width: 520px;
-    border: 4px solid #ffcc00;
-    border-radius: 20px;
-    padding: 24px;
-    background: rgba(0,0,0,0.65);
-    box-shadow: 0 0 30px rgba(255,204,0,0.45);
-  }
+#gameOver {
+  display: none;
+}
 
-  h1 {
-    color: #ffcc00;
-    font-size: 34px;
-    margin: 0 0 12px;
-  }
+.panel {
+  max-width: 600px;
+  background: rgba(0,0,0,0.7);
+  border: 4px solid #ffd400;
+  border-radius: 20px;
+  padding: 24px;
+}
 
-  #startBtn {
-    font-size: 24px;
-    padding: 14px 28px;
-    border: none;
-    border-radius: 14px;
-    background: #ffcc00;
-    font-weight: bold;
-  }
+h1 {
+  color: #ffd400;
+  font-size: 34px;
+  text-shadow: 3px 3px #e33;
+}
 
+button {
+  font-weight: bold;
+  border: 0;
+  border-radius: 16px;
+  background: #ffd400;
+  color: #111;
+}
+
+.bigButton {
+  font-size: 24px;
+  padding: 14px 28px;
+}
+
+#hud {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 20;
+  color: white;
+  font-weight: bold;
+  text-shadow: 2px 2px black;
+  background: rgba(0,0,0,0.45);
+  padding: 10px;
+  border-radius: 12px;
+  width: 220px;
+}
+
+#lifeOuter {
+  width: 100%;
+  height: 20px;
+  background: #5c0000;
+  border: 2px solid white;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+#lifeInner {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #23ff23, #ffff33);
+}
+
+#crosshair {
+  position: fixed;
+  z-index: 15;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 38px;
+  font-weight: bold;
+  text-shadow: 2px 2px black;
+  pointer-events: none;
+}
+
+#damageFlash {
+  position: fixed;
+  inset: 0;
+  z-index: 14;
+  pointer-events: none;
+  background: rgba(255,0,0,0);
+}
+
+.ctrl {
+  position: fixed;
+  z-index: 30;
+  width: 68px;
+  height: 58px;
+  font-size: 28px;
+  border: 2px solid white;
+  background: rgba(255,255,255,0.75);
+}
+
+.ctrl:active {
+  background: #ffd400;
+}
+
+#forward { left: 90px; bottom: 128px; }
+#back { left: 90px; bottom: 38px; }
+#left { left: 18px; bottom: 82px; }
+#right { left: 162px; bottom: 82px; }
+
+#turnLeft { right: 130px; bottom: 136px; }
+#turnRight { right: 22px; bottom: 136px; }
+
+#shoot {
+  right: 28px;
+  bottom: 38px;
+  width: 120px;
+  height: 90px;
+  font-size: 18px;
+  background: #ff3333;
+  color: white;
+}
+
+#hint {
+  position: fixed;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  color: white;
+  z-index: 18;
+  text-align: center;
+  font-size: 13px;
+  text-shadow: 1px 1px black;
+  pointer-events: none;
+}
+
+@media (max-width: 650px) {
   #hud {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 10;
-    color: white;
-    font-size: 18px;
-    text-shadow: 2px 2px 4px black;
-    background: rgba(0,0,0,0.35);
-    padding: 8px 10px;
-    border-radius: 10px;
+    width: 185px;
+    font-size: 14px;
   }
 
-  #crosshair {
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    z-index: 9;
-    font-size: 34px;
-    text-shadow: 2px 2px 4px black;
-    pointer-events: none;
+  #turnLeft, #turnRight {
+    width: 58px;
   }
-
-  .pad {
-    position: fixed;
-    z-index: 12;
-    bottom: 20px;
-  }
-
-  #movePad {
-    left: 18px;
-    width: 170px;
-    height: 170px;
-  }
-
-  #actionPad {
-    right: 18px;
-    width: 170px;
-    height: 170px;
-  }
-
-  .ctrl {
-    position: absolute;
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
-    border: 2px solid white;
-    background: rgba(255, 204, 0, 0.88);
-    font-size: 24px;
-    font-weight: bold;
-    color: #111;
-  }
-
-  #forward { left: 57px; top: 0; }
-  #back { left: 57px; bottom: 0; }
-  #left { left: 0; top: 57px; }
-  #right { right: 0; top: 57px; }
-
-  #turnLeft { left: 0; top: 57px; }
-  #turnRight { right: 0; top: 57px; }
 
   #shoot {
-    left: 45px;
-    top: 38px;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: #ff3333;
-    color: white;
-    font-size: 15px;
+    width: 106px;
+    height: 88px;
   }
 
-  #tip {
-    position: fixed;
-    bottom: 194px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    color: white;
-    font-size: 13px;
-    background: rgba(0,0,0,0.4);
-    padding: 6px 10px;
-    border-radius: 10px;
-    text-align: center;
+  #hint {
+    display: none;
   }
+}
 </style>
 </head>
+
 <body>
 
-<div id="start">
-  <div id="startBox">
+<div id="startScreen">
+  <div class="panel">
     <h1>WHACKY HIJINKS JOE FPS</h1>
-    <p>Walk around the house and throw cereal puffs at the Joe clones.</p>
-    <p><b>Phone:</b> buttons to move, drag screen to look, THROW to shoot.</p>
-    <p><b>Computer:</b> WASD to move, mouse/arrow keys to turn, Space to throw.</p>
-    <button id="startBtn">START</button>
+    <p>Walk through a kitchen, hallway, corners, living room, and stair area.</p>
+    <p>Throw cereal puffs at the Joe clones.</p>
+    <p><b>Phone:</b> ▲ ▼ ◀ ▶ to move, ⟲ ⟳ to turn, drag screen to look, THROW to shoot.</p>
+    <p><b>Computer:</b> WASD to move, arrow keys/mouse to look, Space/click to shoot.</p>
+    <button id="startBtn" class="bigButton">START GAME</button>
+  </div>
+</div>
+
+<div id="gameOver">
+  <div class="panel">
+    <h1>JOE CHAOS OVERLOAD!</h1>
+    <p id="finalScore">Final Score: 0</p>
+    <button id="restartBtn" class="bigButton">PLAY AGAIN</button>
   </div>
 </div>
 
 <canvas id="game"></canvas>
 
-<div id="hud">Score: 0 | Health: 100</div>
+<div id="hud">
+  <div id="hudText">Score: 0</div>
+  <div id="lifeOuter">
+    <div id="lifeInner"></div>
+  </div>
+</div>
+
 <div id="crosshair">+</div>
-<div id="tip">Drag the screen to look around</div>
+<div id="damageFlash"></div>
+<div id="hint">Drag the screen to look around. Top-right minimap shows the house layout.</div>
 
-<div id="movePad" class="pad">
-  <button class="ctrl" id="forward">▲</button>
-  <button class="ctrl" id="back">▼</button>
-  <button class="ctrl" id="left">◀</button>
-  <button class="ctrl" id="right">▶</button>
-</div>
-
-<div id="actionPad" class="pad">
-  <button class="ctrl" id="turnLeft">⟲</button>
-  <button class="ctrl" id="turnRight">⟳</button>
-  <button class="ctrl" id="shoot">THROW</button>
-</div>
+<button class="ctrl" id="forward">▲</button>
+<button class="ctrl" id="back">▼</button>
+<button class="ctrl" id="left">◀</button>
+<button class="ctrl" id="right">▶</button>
+<button class="ctrl" id="turnLeft">⟲</button>
+<button class="ctrl" id="turnRight">⟳</button>
+<button class="ctrl" id="shoot">THROW</button>
 
 <script>
-const JOE_SRC = "data:image/jpeg;base64,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";
-
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-const joeImg = new Image();
-joeImg.src = JOE_SRC;
+const hudText = document.getElementById("hudText");
+const lifeInner = document.getElementById("lifeInner");
+const damageFlash = document.getElementById("damageFlash");
 
 let W = 0;
 let H = 0;
@@ -195,20 +239,66 @@ function resize() {
   W = canvas.width = window.innerWidth;
   H = canvas.height = window.innerHeight;
 }
+
 resize();
 window.addEventListener("resize", resize);
 
-let running = false;
-let score = 0;
-let health = 100;
-let lastTime = performance.now();
-let lastShot = 0;
+/*
+Map key:
+# = wall
+. = kitchen floor
+K = kitchen cabinet wall
+I = kitchen island
+c = carpet/living room
+s = stairs
+*/
+const MAP = [
+"########################",
+"#K....K.....#....sssss#",
+"#K....K.....#....sssss#",
+"#K..........#....sssss#",
+"#K....I.....#....sssss#",
+"#K....I.....#.........#",
+"#K..........####..#####",
+"#K....................#",
+"#######..##############",
+"#cccccc..#............#",
+"#cccccc..#............#",
+"#cccccc...............#",
+"#cccccc..#............#",
+"#cccccc..#............#",
+"########################"
+];
+
+const mapH = MAP.length;
+const mapW = MAP[0].length;
+
+function tileAt(x, y) {
+  const mx = Math.floor(x);
+  const my = Math.floor(y);
+
+  if (mx < 0 || my < 0 || mx >= mapW || my >= mapH) return "#";
+
+  return MAP[my][mx];
+}
+
+function isWall(x, y) {
+  const t = tileAt(x, y);
+  return t === "#" || t === "K" || t === "I";
+}
 
 const player = {
-  x: 0,
-  y: 0,
-  angle: 0
+  x: 3.5,
+  y: 7.4,
+  angle: 0,
+  health: 100
 };
+
+let running = false;
+let score = 0;
+let lastTime = performance.now();
+let lastShot = 0;
+let muzzleFlash = 0;
 
 const controls = {
   forward: false,
@@ -220,59 +310,624 @@ const controls = {
 };
 
 const enemies = [];
-const puffs = [];
-
-const props = [
-  {x: 5, y: 3, label: "MILK", color: "#ffffff"},
-  {x: -4, y: 6, label: "CEREAL", color: "#ffcc00"},
-  {x: 7, y: -6, label: "LADDER", color: "#7777ff"},
-  {x: -7, y: -5, label: "TOOLS", color: "#ff3333"},
-  {x: 11, y: 2, label: "SOFA", color: "#a05a2c"},
-  {x: -11, y: 4, label: "BOX", color: "#cc8844"},
-  {x: 2, y: 12, label: "LIGHT", color: "#ffffaa"},
-  {x: -10, y: -12, label: "BOWL", color: "#cc0000"},
-  {x: 14, y: -10, label: "NO MILK", color: "#ffffff"},
-  {x: -15, y: 11, label: "CRASH", color: "#ff8800"}
-];
+const cerealShots = [];
+const floatTexts = [];
 
 function resetGame() {
   running = true;
   score = 0;
-  health = 100;
-  player.x = 0;
-  player.y = 0;
+  player.health = 100;
+  player.x = 3.5;
+  player.y = 7.4;
   player.angle = 0;
+
   enemies.length = 0;
-  puffs.length = 0;
+  cerealShots.length = 0;
+  floatTexts.length = 0;
 
-  for (let i = 0; i < 8; i++) spawnJoe();
+  spawnJoe(18.5, 3.5);
+  spawnJoe(12.5, 11.5);
+  spawnJoe(4.5, 11.5);
+  spawnJoe(20.5, 7.5);
+  spawnJoe(8.5, 3.5);
 
-  document.getElementById("start").style.display = "none";
+  document.getElementById("startScreen").style.display = "none";
+  document.getElementById("gameOver").style.display = "none";
 }
 
-function spawnJoe() {
-  const a = Math.random() * Math.PI * 2;
-  const d = 8 + Math.random() * 12;
+function spawnJoe(x, y) {
   enemies.push({
-    x: player.x + Math.cos(a) * d,
-    y: player.y + Math.sin(a) * d,
-    hp: 1
+    x,
+    y,
+    hp: 1,
+    wobble: Math.random() * 10
   });
 }
 
-document.getElementById("startBtn").addEventListener("click", resetGame);
+function randomOpenSpot() {
+  for (let i = 0; i < 200; i++) {
+    const x = 1.5 + Math.random() * (mapW - 3);
+    const y = 1.5 + Math.random() * (mapH - 3);
 
-function bindButton(id, keyName) {
+    if (!isWall(x, y)) {
+      const dx = x - player.x;
+      const dy = y - player.y;
+      if (Math.sqrt(dx * dx + dy * dy) > 5) return {x, y};
+    }
+  }
+
+  return {x: 20.5, y: 7.5};
+}
+
+function movePlayer(dx, dy) {
+  const radius = 0.22;
+
+  let nx = player.x + dx;
+  let ny = player.y;
+
+  if (
+    !isWall(nx + radius, ny) &&
+    !isWall(nx - radius, ny) &&
+    !isWall(nx, ny + radius) &&
+    !isWall(nx, ny - radius)
+  ) {
+    player.x = nx;
+  }
+
+  nx = player.x;
+  ny = player.y + dy;
+
+  if (
+    !isWall(nx + radius, ny) &&
+    !isWall(nx - radius, ny) &&
+    !isWall(nx, ny + radius) &&
+    !isWall(nx, ny - radius)
+  ) {
+    player.y = ny;
+  }
+}
+
+function update(dt) {
+  const moveSpeed = 3.1;
+  const turnSpeed = 2.7;
+
+  if (controls.turnLeft) player.angle -= turnSpeed * dt;
+  if (controls.turnRight) player.angle += turnSpeed * dt;
+
+  let forward = 0;
+  let side = 0;
+
+  if (controls.forward) forward += 1;
+  if (controls.back) forward -= 1;
+  if (controls.right) side += 1;
+  if (controls.left) side -= 1;
+
+  const ca = Math.cos(player.angle);
+  const sa = Math.sin(player.angle);
+
+  const dx = (ca * forward - sa * side) * moveSpeed * dt;
+  const dy = (sa * forward + ca * side) * moveSpeed * dt;
+
+  movePlayer(dx, dy);
+
+  for (let i = cerealShots.length - 1; i >= 0; i--) {
+    const s = cerealShots[i];
+
+    s.x += s.vx * dt;
+    s.y += s.vy * dt;
+    s.life -= dt;
+
+    if (isWall(s.x, s.y) || s.life <= 0) {
+      cerealShots.splice(i, 1);
+      continue;
+    }
+
+    for (let j = enemies.length - 1; j >= 0; j--) {
+      const e = enemies[j];
+      const ex = e.x - s.x;
+      const ey = e.y - s.y;
+
+      if (Math.sqrt(ex * ex + ey * ey) < 0.55) {
+        enemies.splice(j, 1);
+        cerealShots.splice(i, 1);
+        score += 10;
+
+        floatTexts.push({
+          x: e.x,
+          y: e.y,
+          text: "CRUNCH!",
+          life: 1
+        });
+
+        const p = randomOpenSpot();
+        spawnJoe(p.x, p.y);
+        break;
+      }
+    }
+  }
+
+  for (const e of enemies) {
+    e.wobble += dt * 6;
+
+    const dx = player.x - e.x;
+    const dy = player.y - e.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist > 0.45) {
+      const speed = 0.75;
+      const nx = e.x + dx / dist * speed * dt;
+      const ny = e.y + dy / dist * speed * dt;
+
+      if (!isWall(nx, e.y)) e.x = nx;
+      if (!isWall(e.x, ny)) e.y = ny;
+    }
+
+    if (dist < 0.85) {
+      player.health -= 15 * dt;
+      damageFlash.style.background = "rgba(255,0,0,0.24)";
+    }
+  }
+
+  if (muzzleFlash > 0) muzzleFlash -= dt;
+
+  for (let i = floatTexts.length - 1; i >= 0; i--) {
+    floatTexts[i].life -= dt;
+    floatTexts[i].y -= dt * 0.35;
+    if (floatTexts[i].life <= 0) floatTexts.splice(i, 1);
+  }
+
+  if (player.health <= 0) {
+    running = false;
+    document.getElementById("finalScore").textContent = "Final Score: " + score;
+    document.getElementById("gameOver").style.display = "flex";
+  }
+
+  lifeInner.style.width = Math.max(0, player.health) + "%";
+  hudText.textContent = "Score: " + score + " | Life: " + Math.max(0, Math.floor(player.health));
+
+  setTimeout(() => {
+    damageFlash.style.background = "rgba(255,0,0,0)";
+  }, 70);
+}
+
+function shoot() {
+  if (!running) return;
+
+  const now = performance.now();
+  if (now - lastShot < 220) return;
+  lastShot = now;
+
+  muzzleFlash = 0.08;
+
+  cerealShots.push({
+    x: player.x + Math.cos(player.angle) * 0.55,
+    y: player.y + Math.sin(player.angle) * 0.55,
+    vx: Math.cos(player.angle) * 8.5,
+    vy: Math.sin(player.angle) * 8.5,
+    life: 0.9
+  });
+}
+
+const FOV = Math.PI / 3;
+const rayStep = 0.035;
+
+function castRay(angle) {
+  let x = player.x;
+  let y = player.y;
+  const dx = Math.cos(angle) * rayStep;
+  const dy = Math.sin(angle) * rayStep;
+  let dist = 0;
+
+  for (let i = 0; i < 700; i++) {
+    x += dx;
+    y += dy;
+    dist += rayStep;
+
+    const t = tileAt(x, y);
+    if (t === "#" || t === "K" || t === "I") {
+      return {
+        x,
+        y,
+        dist,
+        tile: t,
+        mx: Math.floor(x),
+        my: Math.floor(y),
+        wallX: x - Math.floor(x),
+        wallY: y - Math.floor(y)
+      };
+    }
+  }
+
+  return {x, y, dist: 25, tile: "#", mx: 0, my: 0, wallX: 0, wallY: 0};
+}
+
+function drawCeilingAndFloor() {
+  const ceiling = ctx.createLinearGradient(0, 0, 0, H / 2);
+  ceiling.addColorStop(0, "#eeeeee");
+  ceiling.addColorStop(1, "#cfcfcf");
+  ctx.fillStyle = ceiling;
+  ctx.fillRect(0, 0, W, H / 2);
+
+  const floorTile = tileAt(player.x, player.y);
+  let floorColor = "#d9c28c";
+
+  if (floorTile === "c") floorColor = "#8a929d";
+  if (floorTile === "s") floorColor = "#5d6068";
+
+  const floor = ctx.createLinearGradient(0, H / 2, 0, H);
+  floor.addColorStop(0, floorColor);
+  floor.addColorStop(1, "#4d321f");
+
+  ctx.fillStyle = floor;
+  ctx.fillRect(0, H / 2, W, H / 2);
+
+  ctx.strokeStyle = "rgba(255,255,255,0.16)";
+  for (let y = H / 2; y < H; y += 34) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(W, y);
+    ctx.stroke();
+  }
+}
+
+const zBuffer = [];
+
+function drawWallStripe(x, width, top, height, hit) {
+  let base = "#f1e7d7";
+
+  if (hit.tile === "#") base = "#eadfd2";
+  if (hit.tile === "K") base = "#c9a46a";
+  if (hit.tile === "I") base = "#b98b52";
+
+  if (hit.mx >= 15 && hit.my <= 6) base = "#6c7078";
+
+  const shade = Math.max(0.28, 1 - hit.dist / 12);
+  ctx.fillStyle = shadeColor(base, shade);
+  ctx.fillRect(x, top, width, height);
+
+  if (hit.tile === "#") {
+    if ((Math.floor(hit.wallX * 10) + Math.floor(hit.my)) % 2 === 0) {
+      ctx.fillStyle = "rgba(20,45,80,0.45)";
+      ctx.fillRect(x, top, width, height);
+    }
+  }
+
+  if (hit.tile === "K") {
+    ctx.fillStyle = "rgba(80,45,15,0.35)";
+    ctx.fillRect(x, top + height * 0.2, width, height * 0.08);
+    ctx.fillRect(x, top + height * 0.58, width, height * 0.06);
+  }
+
+  if (hit.tile === "I") {
+    ctx.fillStyle = "rgba(255,255,255,0.25)";
+    ctx.fillRect(x, top, width, height * 0.12);
+  }
+
+  if (hit.mx >= 15 && hit.my <= 6) {
+    ctx.strokeStyle = "rgba(25,25,25,0.35)";
+    for (let yy = top; yy < top + height; yy += Math.max(6, height / 8)) {
+      ctx.beginPath();
+      ctx.moveTo(x, yy);
+      ctx.lineTo(x + width, yy);
+      ctx.stroke();
+    }
+  }
+}
+
+function shadeColor(hex, shade) {
+  const r = parseInt(hex.substr(1, 2), 16);
+  const g = parseInt(hex.substr(3, 2), 16);
+  const b = parseInt(hex.substr(5, 2), 16);
+  return `rgb(${Math.floor(r * shade)},${Math.floor(g * shade)},${Math.floor(b * shade)})`;
+}
+
+function renderWorld() {
+  drawCeilingAndFloor();
+  zBuffer.length = W;
+
+  const step = Math.max(1, Math.floor(W / 420));
+
+  for (let x = 0; x < W; x += step) {
+    const cameraX = 2 * x / W - 1;
+    const rayAngle = player.angle + Math.atan(cameraX * Math.tan(FOV / 2));
+    const hit = castRay(rayAngle);
+    const correctedDist = hit.dist * Math.cos(rayAngle - player.angle);
+
+    const wallHeight = Math.min(H * 2, H / Math.max(0.05, correctedDist));
+    const top = Math.floor(H / 2 - wallHeight / 2);
+
+    hit.dist = correctedDist;
+
+    drawWallStripe(x, step + 1, top, wallHeight, hit);
+
+    for (let i = 0; i < step + 1; i++) {
+      zBuffer[x + i] = correctedDist;
+    }
+  }
+}
+
+function drawJoeSprite(screenX, screenY, size) {
+  ctx.save();
+  ctx.translate(screenX, screenY);
+
+  ctx.fillStyle = "rgba(0,0,0,0.35)";
+  ctx.beginPath();
+  ctx.ellipse(0, size * 0.62, size * 0.35, size * 0.08, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#3e4a32";
+  ctx.fillRect(-size * 0.25, size * 0.05, size * 0.5, size * 0.55);
+
+  ctx.fillStyle = "#f2b27e";
+  ctx.beginPath();
+  ctx.arc(0, -size * 0.18, size * 0.27, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#6b3518";
+  for (let i = 0; i < 9; i++) {
+    ctx.beginPath();
+    ctx.arc(-size * 0.25 + i * size * 0.06, -size * 0.42 - Math.sin(i) * 4, size * 0.08, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = "white";
+  ctx.beginPath();
+  ctx.arc(-size * 0.09, -size * 0.21, size * 0.045, 0, Math.PI * 2);
+  ctx.arc(size * 0.09, -size * 0.21, size * 0.045, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "black";
+  ctx.beginPath();
+  ctx.arc(-size * 0.09, -size * 0.21, size * 0.018, 0, Math.PI * 2);
+  ctx.arc(size * 0.09, -size * 0.21, size * 0.018, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = Math.max(2, size * 0.02);
+  ctx.beginPath();
+  ctx.arc(0, -size * 0.12, size * 0.13, 0, Math.PI);
+  ctx.stroke();
+
+  ctx.fillStyle = "white";
+  ctx.font = "bold " + Math.floor(size * 0.13) + "px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("JOE", 0, size * 0.37);
+
+  ctx.restore();
+}
+
+function drawSprites() {
+  const dirX = Math.cos(player.angle);
+  const dirY = Math.sin(player.angle);
+  const planeX = -dirY * Math.tan(FOV / 2);
+  const planeY = dirX * Math.tan(FOV / 2);
+
+  const sprites = [];
+
+  for (const e of enemies) {
+    sprites.push({
+      type: "enemy",
+      obj: e,
+      dist: (e.x - player.x) ** 2 + (e.y - player.y) ** 2
+    });
+  }
+
+  for (const f of floatTexts) {
+    sprites.push({
+      type: "text",
+      obj: f,
+      dist: (f.x - player.x) ** 2 + (f.y - player.y) ** 2
+    });
+  }
+
+  sprites.sort((a, b) => b.dist - a.dist);
+
+  for (const item of sprites) {
+    const s = item.obj;
+    const spriteX = s.x - player.x;
+    const spriteY = s.y - player.y;
+
+    const invDet = 1 / (planeX * dirY - dirX * planeY);
+    const transformX = invDet * (dirY * spriteX - dirX * spriteY);
+    const transformY = invDet * (-planeY * spriteX + planeX * spriteY);
+
+    if (transformY <= 0.1) continue;
+
+    const screenX = Math.floor((W / 2) * (1 + transformX / transformY));
+
+    if (screenX < -200 || screenX > W + 200) continue;
+    if (transformY > zBuffer[Math.max(0, Math.min(W - 1, screenX))] + 0.2) continue;
+
+    if (item.type === "text") {
+      ctx.globalAlpha = Math.max(0, Math.min(1, s.life));
+      ctx.font = "bold " + Math.floor(30 / transformY + 18) + "px Arial";
+      ctx.textAlign = "center";
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "black";
+      ctx.fillStyle = "#ffd400";
+      ctx.strokeText(s.text, screenX, H / 2 - H / transformY * 0.4);
+      ctx.fillText(s.text, screenX, H / 2 - H / transformY * 0.4);
+      ctx.globalAlpha = 1;
+      continue;
+    }
+
+    const size = Math.min(320, Math.abs(H / transformY * 0.65));
+    const y = H / 2 + Math.sin(s.wobble) * 4;
+
+    drawJoeSprite(screenX, y, size);
+
+    ctx.font = "bold " + Math.max(12, Math.floor(size * 0.13)) + "px Arial";
+    ctx.textAlign = "center";
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "black";
+    ctx.fillStyle = "white";
+    ctx.strokeText("JOE CLONE", screenX, y - size * 0.58);
+    ctx.fillText("JOE CLONE", screenX, y - size * 0.58);
+  }
+}
+
+function drawShots() {
+  for (const s of cerealShots) {
+    const dx = s.x - player.x;
+    const dy = s.y - player.y;
+    const angleTo = Math.atan2(dy, dx);
+    let rel = angleTo - player.angle;
+
+    while (rel > Math.PI) rel -= Math.PI * 2;
+    while (rel < -Math.PI) rel += Math.PI * 2;
+
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (Math.abs(rel) > FOV) continue;
+
+    const sx = W / 2 + Math.tan(rel) * W;
+    const sy = H / 2 + H / dist * 0.1;
+    const r = Math.max(4, 18 / dist);
+
+    ctx.fillStyle = "#ffd400";
+    ctx.beginPath();
+    ctx.arc(sx, sy, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#a86b00";
+    ctx.stroke();
+  }
+}
+
+function drawWeapon() {
+  const bob = Math.sin(performance.now() / 130) * 3;
+
+  if (muzzleFlash > 0) {
+    ctx.fillStyle = "rgba(255,220,0,0.65)";
+    ctx.beginPath();
+    ctx.arc(W / 2, H * 0.58, 35, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = "#9e0000";
+  ctx.beginPath();
+  ctx.ellipse(W / 2, H - 55 + bob, 130, 45, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#ff5555";
+  ctx.beginPath();
+  ctx.ellipse(W / 2, H - 73 + bob, 105, 30, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  const colors = ["#ffd400", "#ff3333", "#35c6ff", "#62ff55", "#ff9d00"];
+
+  for (let i = 0; i < 18; i++) {
+    const x = W / 2 - 78 + ((i * 37) % 156);
+    const y = H - 84 + bob + ((i * 19) % 23);
+
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.font = "bold 16px Arial";
+  ctx.textAlign = "center";
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "black";
+  ctx.fillStyle = "white";
+  ctx.strokeText("CEREAL BLASTER", W / 2, H - 32 + bob);
+  ctx.fillText("CEREAL BLASTER", W / 2, H - 32 + bob);
+}
+
+function drawMiniMap() {
+  const cell = Math.max(5, Math.min(9, Math.floor(W / 90)));
+  const pad = 8;
+  const mw = mapW * cell;
+  const mh = mapH * cell;
+  const x0 = W - mw - pad;
+  const y0 = pad;
+
+  ctx.fillStyle = "rgba(0,0,0,0.62)";
+  ctx.fillRect(x0 - 5, y0 - 5, mw + 10, mh + 30);
+
+  ctx.strokeStyle = "white";
+  ctx.strokeRect(x0 - 5, y0 - 5, mw + 10, mh + 30);
+
+  for (let y = 0; y < mapH; y++) {
+    for (let x = 0; x < mapW; x++) {
+      const t = MAP[y][x];
+      let c = "#222";
+
+      if (t === "#") c = "#1d3557";
+      if (t === "K") c = "#c5a46d";
+      if (t === "I") c = "#a97b42";
+      if (t === ".") c = "#d8c38e";
+      if (t === "c") c = "#818791";
+      if (t === "s") c = "#5f6570";
+
+      ctx.fillStyle = c;
+      ctx.fillRect(x0 + x * cell, y0 + y * cell, cell, cell);
+    }
+  }
+
+  ctx.fillStyle = "rgba(255,255,255,0.9)";
+  ctx.font = Math.max(8, cell * 1.25) + "px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("KITCHEN", x0 + 7 * cell, y0 + 3 * cell);
+  ctx.fillText("STAIRS", x0 + 19 * cell, y0 + 4 * cell);
+  ctx.fillText("HALL", x0 + 10 * cell, y0 + 11 * cell);
+
+  for (const e of enemies) {
+    ctx.fillStyle = "#ff3333";
+    ctx.beginPath();
+    ctx.arc(x0 + e.x * cell, y0 + e.y * cell, Math.max(2, cell * 0.45), 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = "#00ff66";
+  ctx.beginPath();
+  ctx.arc(x0 + player.x * cell, y0 + player.y * cell, Math.max(3, cell * 0.55), 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = "#00ff66";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x0 + player.x * cell, y0 + player.y * cell);
+  ctx.lineTo(
+    x0 + (player.x + Math.cos(player.angle) * 1.3) * cell,
+    y0 + (player.y + Math.sin(player.angle) * 1.3) * cell
+  );
+  ctx.stroke();
+
+  ctx.fillStyle = "white";
+  ctx.font = "bold 11px Arial";
+  ctx.fillText("HOUSE MAP", x0 + mw / 2, y0 + mh + 18);
+}
+
+function draw() {
+  renderWorld();
+  drawShots();
+  drawSprites();
+  drawWeapon();
+  drawMiniMap();
+}
+
+function loop(now) {
+  const dt = Math.min(0.04, (now - lastTime) / 1000);
+  lastTime = now;
+
+  if (running) update(dt);
+
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function bindButton(id, name) {
   const el = document.getElementById(id);
 
   function down(e) {
     e.preventDefault();
-    controls[keyName] = true;
+    controls[name] = true;
   }
 
   function up(e) {
     e.preventDefault();
-    controls[keyName] = false;
+    controls[name] = false;
   }
 
   el.addEventListener("touchstart", down, {passive:false});
@@ -296,24 +951,41 @@ document.getElementById("shoot").addEventListener("touchstart", function(e) {
 }, {passive:false});
 
 document.getElementById("shoot").addEventListener("click", shoot);
+document.getElementById("startBtn").addEventListener("click", resetGame);
+document.getElementById("restartBtn").addEventListener("click", resetGame);
 
 window.addEventListener("keydown", function(e) {
-  if (e.key === "w" || e.key === "ArrowUp") controls.forward = true;
-  if (e.key === "s" || e.key === "ArrowDown") controls.back = true;
-  if (e.key === "a") controls.left = true;
-  if (e.key === "d") controls.right = true;
+  const k = e.key.toLowerCase();
+
+  if (k === "w" || e.key === "ArrowUp") controls.forward = true;
+  if (k === "s" || e.key === "ArrowDown") controls.back = true;
+  if (k === "a") controls.left = true;
+  if (k === "d") controls.right = true;
   if (e.key === "ArrowLeft") controls.turnLeft = true;
   if (e.key === "ArrowRight") controls.turnRight = true;
   if (e.code === "Space") shoot();
 });
 
 window.addEventListener("keyup", function(e) {
-  if (e.key === "w" || e.key === "ArrowUp") controls.forward = false;
-  if (e.key === "s" || e.key === "ArrowDown") controls.back = false;
-  if (e.key === "a") controls.left = false;
-  if (e.key === "d") controls.right = false;
+  const k = e.key.toLowerCase();
+
+  if (k === "w" || e.key === "ArrowUp") controls.forward = false;
+  if (k === "s" || e.key === "ArrowDown") controls.back = false;
+  if (k === "a") controls.left = false;
+  if (k === "d") controls.right = false;
   if (e.key === "ArrowLeft") controls.turnLeft = false;
   if (e.key === "ArrowRight") controls.turnRight = false;
+});
+
+canvas.addEventListener("click", function() {
+  shoot();
+  if (canvas.requestPointerLock) canvas.requestPointerLock();
+});
+
+window.addEventListener("mousemove", function(e) {
+  if (document.pointerLockElement === canvas) {
+    player.angle += e.movementX * 0.0028;
+  }
 });
 
 let dragging = false;
@@ -326,6 +998,7 @@ canvas.addEventListener("pointerdown", function(e) {
 
 canvas.addEventListener("pointermove", function(e) {
   if (!dragging) return;
+
   const dx = e.clientX - lastX;
   lastX = e.clientX;
   player.angle += dx * 0.006;
@@ -338,326 +1011,6 @@ canvas.addEventListener("pointerup", function() {
 canvas.addEventListener("pointercancel", function() {
   dragging = false;
 });
-
-function shoot() {
-  if (!running) return;
-
-  const now = performance.now();
-  if (now - lastShot < 220) return;
-  lastShot = now;
-
-  puffs.push({
-    x: player.x + Math.cos(player.angle) * 0.7,
-    y: player.y + Math.sin(player.angle) * 0.7,
-    vx: Math.cos(player.angle) * 11,
-    vy: Math.sin(player.angle) * 11,
-    life: 1.1
-  });
-}
-
-function update(dt) {
-  const moveSpeed = 4.2;
-  const turnSpeed = 2.6;
-
-  if (controls.turnLeft) player.angle -= turnSpeed * dt;
-  if (controls.turnRight) player.angle += turnSpeed * dt;
-
-  let forwardMove = 0;
-  let sideMove = 0;
-
-  if (controls.forward) forwardMove += 1;
-  if (controls.back) forwardMove -= 1;
-  if (controls.right) sideMove += 1;
-  if (controls.left) sideMove -= 1;
-
-  const ca = Math.cos(player.angle);
-  const sa = Math.sin(player.angle);
-
-  player.x += ca * forwardMove * moveSpeed * dt;
-  player.y += sa * forwardMove * moveSpeed * dt;
-
-  player.x += -sa * sideMove * moveSpeed * dt;
-  player.y += ca * sideMove * moveSpeed * dt;
-
-  for (let i = puffs.length - 1; i >= 0; i--) {
-    const p = puffs[i];
-    p.x += p.vx * dt;
-    p.y += p.vy * dt;
-    p.life -= dt;
-    if (p.life <= 0) puffs.splice(i, 1);
-  }
-
-  for (let i = enemies.length - 1; i >= 0; i--) {
-    const e = enemies[i];
-    const dx = player.x - e.x;
-    const dy = player.y - e.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-
-    if (dist > 0.1) {
-      e.x += dx / dist * 1.15 * dt;
-      e.y += dy / dist * 1.15 * dt;
-    }
-
-    if (dist < 1.1) {
-      health -= 18 * dt;
-    }
-
-    for (let j = puffs.length - 1; j >= 0; j--) {
-      const p = puffs[j];
-      const hx = e.x - p.x;
-      const hy = e.y - p.y;
-      const hitDist = Math.sqrt(hx * hx + hy * hy);
-
-      if (hitDist < 0.9) {
-        enemies.splice(i, 1);
-        puffs.splice(j, 1);
-        score += 10;
-        spawnJoe();
-        break;
-      }
-    }
-  }
-
-  if (health <= 0) {
-    running = false;
-    document.getElementById("start").style.display = "flex";
-    document.getElementById("startBox").innerHTML = `
-      <h1>JOE CHAOS OVERLOAD!</h1>
-      <p>Final Score: ${score}</p>
-      <button id="startBtn2">PLAY AGAIN</button>
-    `;
-    document.getElementById("startBtn2").addEventListener("click", resetGame);
-  }
-
-  document.getElementById("hud").textContent =
-    "Score: " + score + " | Health: " + Math.max(0, Math.floor(health)) +
-    " | X: " + player.x.toFixed(1) + " Y: " + player.y.toFixed(1);
-}
-
-function project(x, y) {
-  const dx = x - player.x;
-  const dy = y - player.y;
-
-  const ca = Math.cos(player.angle);
-  const sa = Math.sin(player.angle);
-
-  const z = dx * ca + dy * sa;
-  const side = -dx * sa + dy * ca;
-
-  if (z <= 0.2) return null;
-
-  const fov = W * 0.85;
-  const sx = W / 2 + side / z * fov;
-  const groundY = H * 0.52 + H * 0.42 / z;
-  const scale = Math.min(900, 260 / z);
-
-  if (sx < -300 || sx > W + 300) return null;
-
-  return {sx, groundY, scale, z};
-}
-
-function drawBackground() {
-  const sky = ctx.createLinearGradient(0, 0, 0, H * 0.55);
-  sky.addColorStop(0, "#7dd3ff");
-  sky.addColorStop(1, "#f7d18b");
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, W, H * 0.55);
-
-  ctx.fillStyle = "#c7965d";
-  ctx.fillRect(0, H * 0.43, W, H * 0.14);
-
-  ctx.fillStyle = "#5b3921";
-  ctx.fillRect(0, H * 0.55, W, H * 0.45);
-
-  ctx.strokeStyle = "rgba(255,255,255,0.15)";
-  ctx.lineWidth = 1;
-
-  for (let i = 0; i < 18; i++) {
-    const y = H * 0.56 + i * 28;
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(W, y);
-    ctx.stroke();
-  }
-
-  for (let i = -12; i <= 12; i++) {
-    const x = W / 2 + i * 70;
-    ctx.beginPath();
-    ctx.moveTo(x, H * 0.55);
-    ctx.lineTo(W / 2 + i * 170, H);
-    ctx.stroke();
-  }
-
-  ctx.fillStyle = "rgba(255,255,255,0.9)";
-  ctx.font = "bold 22px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText("WHACKY HOUSE ARENA", W / 2, 42);
-}
-
-function drawProp(o) {
-  const p = project(o.x, o.y);
-  if (!p) return;
-
-  const w = Math.max(22, p.scale * 0.7);
-  const h = Math.max(28, p.scale * 0.9);
-
-  ctx.fillStyle = "rgba(0,0,0,0.3)";
-  ctx.beginPath();
-  ctx.ellipse(p.sx, p.groundY + 6, w * 0.6, 10, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = o.color;
-  ctx.fillRect(p.sx - w / 2, p.groundY - h, w, h);
-
-  ctx.strokeStyle = "#111";
-  ctx.lineWidth = 3;
-  ctx.strokeRect(p.sx - w / 2, p.groundY - h, w, h);
-
-  ctx.fillStyle = "#111";
-  ctx.font = "bold " + Math.max(10, p.scale * 0.13) + "px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText(o.label, p.sx, p.groundY - h / 2);
-}
-
-function drawEnemy(e) {
-  const p = project(e.x, e.y);
-  if (!p) return;
-
-  const imgW = Math.max(48, p.scale * 1.35);
-  const imgH = imgW * 0.84;
-
-  ctx.fillStyle = "rgba(0,0,0,0.35)";
-  ctx.beginPath();
-  ctx.ellipse(p.sx, p.groundY + 8, imgW * 0.38, 12, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.save();
-  ctx.shadowColor = "rgba(0,0,0,0.6)";
-  ctx.shadowBlur = 12;
-  ctx.drawImage(joeImg, p.sx - imgW / 2, p.groundY - imgH, imgW, imgH);
-  ctx.restore();
-
-  ctx.fillStyle = "white";
-  ctx.font = "bold " + Math.max(12, p.scale * 0.13) + "px Arial";
-  ctx.textAlign = "center";
-  ctx.strokeStyle = "black";
-  ctx.lineWidth = 4;
-  ctx.strokeText("JOE CLONE", p.sx, p.groundY - imgH - 8);
-  ctx.fillText("JOE CLONE", p.sx, p.groundY - imgH - 8);
-}
-
-function drawPuff(puff) {
-  const p = project(puff.x, puff.y);
-  if (!p) return;
-
-  const r = Math.max(5, p.scale * 0.13);
-  ctx.fillStyle = "#ffcc00";
-  ctx.beginPath();
-  ctx.arc(p.sx, p.groundY - r * 3, r, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.strokeStyle = "#aa5500";
-  ctx.lineWidth = 2;
-  ctx.stroke();
-}
-
-function drawMiniMap() {
-  const size = 120;
-  const x0 = W - size - 12;
-  const y0 = 12;
-
-  ctx.fillStyle = "rgba(0,0,0,0.45)";
-  ctx.fillRect(x0, y0, size, size);
-
-  ctx.strokeStyle = "white";
-  ctx.strokeRect(x0, y0, size, size);
-
-  ctx.fillStyle = "#00ff66";
-  ctx.beginPath();
-  ctx.arc(x0 + size / 2, y0 + size / 2, 5, 0, Math.PI * 2);
-  ctx.fill();
-
-  for (const e of enemies) {
-    const dx = e.x - player.x;
-    const dy = e.y - player.y;
-    const mx = x0 + size / 2 + dx * 3;
-    const my = y0 + size / 2 + dy * 3;
-    if (mx < x0 || mx > x0 + size || my < y0 || my > y0 + size) continue;
-    ctx.fillStyle = "#ff3333";
-    ctx.beginPath();
-    ctx.arc(mx, my, 4, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  ctx.fillStyle = "white";
-  ctx.font = "10px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText("MAP", x0 + size / 2, y0 + size - 6);
-}
-
-function drawWeapon() {
-  ctx.fillStyle = "#990000";
-  ctx.beginPath();
-  ctx.ellipse(W / 2, H - 38, 125, 42, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = "#ff5555";
-  ctx.beginPath();
-  ctx.ellipse(W / 2, H - 52, 100, 30, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  for (let i = 0; i < 16; i++) {
-    const x = W / 2 - 75 + Math.random() * 150;
-    const y = H - 66 + Math.random() * 25;
-    ctx.fillStyle = ["#ffcc00", "#ff3333", "#33ccff", "#66ff66"][i % 4];
-    ctx.beginPath();
-    ctx.arc(x, y, 5, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  ctx.fillStyle = "white";
-  ctx.font = "bold 16px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText("CEREAL BLASTER", W / 2, H - 28);
-}
-
-function draw() {
-  drawBackground();
-
-  const drawables = [];
-
-  for (const o of props) {
-    const p = project(o.x, o.y);
-    if (p) drawables.push({z: p.z, type: "prop", obj: o});
-  }
-
-  for (const e of enemies) {
-    const p = project(e.x, e.y);
-    if (p) drawables.push({z: p.z, type: "enemy", obj: e});
-  }
-
-  drawables.sort((a, b) => b.z - a.z);
-
-  for (const d of drawables) {
-    if (d.type === "prop") drawProp(d.obj);
-    if (d.type === "enemy") drawEnemy(d.obj);
-  }
-
-  for (const p of puffs) drawPuff(p);
-
-  drawWeapon();
-  drawMiniMap();
-}
-
-function loop(now) {
-  const dt = Math.min(0.033, (now - lastTime) / 1000);
-  lastTime = now;
-
-  if (running) update(dt);
-  draw();
-
-  requestAnimationFrame(loop);
-}
 
 requestAnimationFrame(loop);
 </script>
